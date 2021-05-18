@@ -1,0 +1,19 @@
+/usr/lib64/openmpi/bin:/usr/local/bin:/usr/lib64/mpi/gcc/openmpi/bin:/opt/cuda/bin:/home/shared/evm/stud/s8500/u850503/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+/usr/lib64/openmpi/lib64:/usr/local/lib64/:/opt/cuda/lib64:$LD_LIBRARY_PATH:/usr/lib64/openmpi/lib64
+nodes: /var/spool/torque/aux//8843.cluster.lhpc.bsuir.by
+ibnode04.lhpc.bsuir.by
+ibnode04.lhpc.bsuir.by
+ibnode04.lhpc.bsuir.by
+kekw
+Filtering via CPU
+Filtering via CPU
+Filtering via CPU
+CPU time: 118.834
+CPU time: 255.962
+CPU time: 489.03
+Filtering via GPU pitch: 3584 3072
+GPU time: 0.419584
+Filtering via GPU pitch: 4096 4096
+GPU time: 0.838208
+Filtering via GPU pitch: 7680 7680
+GPU time: 1.71978

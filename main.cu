@@ -3,20 +3,20 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	int rank, size;
+	int rank, commsize;
 
 	MPI_Init (&argc,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);//current process
-	MPI_Comm_size(MPI_COMM_WORLD, &size);//number of process
+	MPI_Comm_size(MPI_COMM_WORLD, &commsize);//number of process
 	
 	const char* primaryImagePath[] = {
-		"avp_logo.ppm", 
-		"belka.ppm", 
-		"cat.ppm", 
-		"nature.ppm", 
-		"fire.ppm", 
-		"graffiti.ppm", 
-		"nvidia.ppm"};
+		"/home/shared/evm/stud/s8500/Image/ppm/avp_logo.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/belka.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/cat.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/nature.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/fire.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/graffiti.ppm", 
+		"/home/shared/evm/stud/s8500/Image/ppm/nvidia.ppm"};
 	const char* outputImagePathCPU[] = {
 		"avp_logo_CPU.ppm", 
 		"belka_CPU.ppm", 
@@ -40,15 +40,10 @@ int main(int argc, char** argv) {
 
 	pixel* input_data = nullptr;
 	
-	for (int i=0;i<size;i++)
-		if(i == rank)
-		{
-			__loadPPM(primaryImagePath[i], reinterpret_cast<unsigned char**>(&input_data),
-			reinterpret_cast<unsigned int*>(&width),
-			reinterpret_cast<unsigned int*>(&height),
-			reinterpret_cast<unsigned int*>(&channels));
-		}
-
+	__loadPPM(primaryImagePath[rank], reinterpret_cast<unsigned char**>(&input_data),
+	reinterpret_cast<unsigned int*>(&width),
+	reinterpret_cast<unsigned int*>(&height),
+	reinterpret_cast<unsigned int*>(&channels));
 
 	const size_t padded_width = width + 2;
 	const size_t padded_height = height + 2;
@@ -73,14 +68,11 @@ int main(int argc, char** argv) {
 
 	// *********************************CPU_END*******************************************************************
 	
-	cuda_filter(width, height, width_in_bytes, padded_width_in_bytes, input_data);
+	cuda_filter(width, height, width_in_bytes, padded_width_in_bytes, input_data, gpu_output_data);
 
-	for (int i=0;i<size;i++)
-		if(i == rank)
-		{
-			__savePPM(outputImagePathCPU[i], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
-			__savePPM(outputImagePathGPU[i], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
-		}
+	
+	__savePPM(outputImagePathCPU[rank], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
+	__savePPM(outputImagePathGPU[rank], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
 
 	delete[] input_data;
 	delete[] cpu_output_data;

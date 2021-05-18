@@ -1,23 +1,16 @@
 CUDA_CC=/opt/cuda-7.5/bin/nvcc
+LD=$(CUDA_CC)
 MPI_CC=mpic++
 CUDA_FLAGS=-arch=sm_20 -std=c++11
 OUTPUT_FILE=lab7_avp
-INPUT_CUDA=kernel.cu
-<<<<<<< HEAD
+INPUT_CUDA=main.cu
+LIBS_PATH = -L/usr/lib64 
+LIBS =  -lmpi -lopa -lmpl -lrt -lcr -lpthread
+INCLUDE_PATH = -I/usr/lib64/mpi/gcc/openmpi-1.10.0/include/
+FLAGS = -g
+
 
 all: cuda
 
 cuda: $(INPUT_FILE)
-	$(CUDA_CC) $(CUDA_FLAGS) $(INPUT_CUDA) -o $(OUTPUT_FILE)
-=======
-INPUT_MPI=kernel.cu
-
-all: cuda
-
-cuda: $(INPUT_CUDA)
-        $(CUDA_CC) $(CUDA_FLAGS) $(INPUT_CUDA) -o $(OUTPUT_FILE)
-mpi: $(INPUT_MPI)
-        $(MPI_CC) 
-
->>>>>>> 094decea79d7896e110ff66fdf3dfb44f69c576a
-
+	$(LD) $(FLAGS)  $(CUDA_FLAGS) $(INPUT_CUDA) -o $(OUTPUT_FILE) 

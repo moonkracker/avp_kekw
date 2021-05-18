@@ -226,7 +226,7 @@ void PrewittFilter(pixel* input_matrix, pixel* output_matrix, const int width, c
 	}
 }
 
-void ApplyPrewittFilter(pixel* input_matrix, pixel* output_matrix, const int width, const int height, pixel* gpu_output_data)
+void ApplyPrewittFilter(pixel* input_matrix, pixel* output_matrix, const int width, const int height)
 {
 	pixel* padded_input_matrix = PadDataByOnePixel(input_matrix, width, height);
 
@@ -236,9 +236,11 @@ void ApplyPrewittFilter(pixel* input_matrix, pixel* output_matrix, const int wid
 }
 
 
-void cuda_filter(size_t width, size_t height, const size_t width_in_bytes, const size_t padded_width_in_bytes, pixel* input_data)
+void cuda_filter(size_t width, size_t height, const size_t width_in_bytes, const size_t padded_width_in_bytes, pixel* input_data, pixel* gpu_output_data)
 {
     // ********************************************************************************************************
+	const int padded_width = width + 2;
+        const int padded_height = height + 2;
 
 	size_t input_pitch = 0;
 	pixel* padded_input = PadDataByOnePixel(input_data, width, height);

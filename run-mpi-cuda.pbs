@@ -14,8 +14,7 @@ free 1>free-`hostname`-run.out&&
 echo $PATH
 echo $LD_LIBRARY_PATH
 cat $PBS_NODEFILE
-echo kekw
 
-/usr/lib64/openmpi/bin/mpirun -hostfile $PBS_NODEFILE /home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/testAVP
+/usr/lib64/openmpi/bin/mpirun -hostfile $PBS_NODEFILE /home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/lab7_avp
 
 

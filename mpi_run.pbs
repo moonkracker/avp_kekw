@@ -1,8 +1,0 @@
-#!/bin/bash
-#PBS -N run
-
-#PBS -l nodes=5:ppn:1=1,walltime=24:00:00
-#PBS -l mem=1gb
-#PBS -j oe
-cd $PBS_O_WORKDIR
-/usr/lib64/openmpi/bin/mpirun -hostfile $PBS_NODEFILE  /home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/lab7Fin

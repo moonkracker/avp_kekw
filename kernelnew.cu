@@ -286,6 +286,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	int rank, nodesize;
+	double start, time, maxtime, mintime, avgtime;
 
 	MPI_Init (&argc,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);//current process
@@ -315,54 +316,71 @@ int main(int argc, char** argv) {
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/fire_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/graffiti_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/nvidia_GPU.ppm"};
-
-	size_t width = 0;
-	size_t height = 0;
-	int channels = 0;
-
-	pixel* input_data = nullptr;
 	
+	int counts[] {1,2,1,2,1};
+	int offsets[] {0,1,3,4,6};
+	MPI_Barrier(MPI_COMM_WORLD);
+	start = MPI_Wtime();
+	for(int i = offsets[rank]; i < offsets[rank] + counts[rank]; i++)
+	{
+		size_t width = 0;
+		size_t height = 0;
+		int channels = 0;
 
-	__loadPPM(primaryImagePath[rank], reinterpret_cast<unsigned char**>(&input_data),
-	reinterpret_cast<unsigned int*>(&width),
-	reinterpret_cast<unsigned int*>(&height),
-	reinterpret_cast<unsigned int*>(&channels));
-
-
-	const size_t padded_width = width + 2;
-	const size_t padded_height = height + 2;
-
-	const size_t size = width * height;
-
-	const size_t width_in_bytes = width * sizeof(pixel);
-	const size_t padded_width_in_bytes = padded_width * sizeof(pixel);
+		pixel* input_data = nullptr;
 	
-	pixel* cpu_output_data = new pixel[size];
-	pixel* gpu_output_data = new pixel[size];
-
-	// *********************************CPU**********************************************************
-
-	cout << "Filtering via CPU" << endl;
-	auto start_cpu = chrono::steady_clock::now();
-	ApplyPrewittFilter(input_data, cpu_output_data, width, height);
-	auto end_cpu = chrono::steady_clock::now();
-	auto cpu_time = end_cpu - start_cpu;
-	float cpu_time_count = chrono::duration<double, milli>(cpu_time).count();
-	cout << "CPU time: " << chrono::duration<double, milli>(cpu_time).count() << endl;
-
-	// *********************************CPU_END*******************************************************************
-	
-	cuda_filter(width, height, width_in_bytes, padded_width_in_bytes, input_data, gpu_output_data);
+		__loadPPM(primaryImagePath[rank], reinterpret_cast<unsigned char**>(&input_data),
+		reinterpret_cast<unsigned int*>(&width),
+		reinterpret_cast<unsigned int*>(&height),
+		reinterpret_cast<unsigned int*>(&channels));
 
 
-	__savePPM(outputImagePathCPU[rank], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
-	__savePPM(outputImagePathGPU[rank], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
+		const size_t padded_width = width + 2;
+		const size_t padded_height = height + 2;
+
+		const size_t size = width * height;
+
+		const size_t width_in_bytes = width * sizeof(pixel);
+		const size_t padded_width_in_bytes = padded_width * sizeof(pixel);
 		
+		pixel* cpu_output_data = new pixel[size];
+		pixel* gpu_output_data = new pixel[size];
 
-	delete[] input_data;
-	delete[] cpu_output_data;
-	delete[] gpu_output_data;
-	
+		// *********************************CPU**********************************************************
+
+		cout << "Filtering via CPU" << endl;
+		auto start_cpu = chrono::steady_clock::now();
+		ApplyPrewittFilter(input_data, cpu_output_data, width, height);
+		auto end_cpu = chrono::steady_clock::now();
+		auto cpu_time = end_cpu - start_cpu;
+		float cpu_time_count = chrono::duration<double, milli>(cpu_time).count();
+		cout << "CPU time: " << chrono::duration<double, milli>(cpu_time).count() << endl;
+
+		// *********************************CPU_END*******************************************************************
+		
+		cuda_filter(width, height, width_in_bytes, padded_width_in_bytes, input_data, gpu_output_data);
+
+
+		__savePPM(outputImagePathCPU[rank], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
+		__savePPM(outputImagePathGPU[rank], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
+			
+
+		delete[] input_data;
+		delete[] cpu_output_data;
+		delete[] gpu_output_data;
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	time = MPI_Wtime() - start;
+
+	MPI_Reduce(&time, &maxtime, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+	MPI_Reduce(&time, &mintime, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+	MPI_Reduce(&time, &avgtime, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+	if (rank == 0)
+	{
+        fulltime = avgtime;
+		avgtime /= nodesize;
+		printf("Min: %lf Max: %lf Avg: %lf Full: %lf\n", mintime, maxtime,avgtime, fulltime);
+	}
 	MPI_Finalize();
 	return 0;
 }

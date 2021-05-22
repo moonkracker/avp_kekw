@@ -1,1 +1,0 @@
-nvcc -I/usr/lib64/openmpi/include -L/usr/lib64/openmpi/lib64 -lmpi kernelnew.cu -std=c++11 -o testAVP

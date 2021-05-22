@@ -316,9 +316,41 @@ int main(int argc, char** argv) {
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/fire_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/graffiti_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/nvidia_GPU.ppm"};
-	
-	int counts[] {1,2,1,2,1};
-	int offsets[] {0,1,3,4,6};
+	vector<int> counts;
+    vector<int> offsets;
+    switch (nodesize)
+    {
+    case 1:
+        counts.assign({7});
+        offsets.assign({0});
+        break;
+    case 2:
+        counts.assign({3, 4});
+        offsets.assign({0, 3});
+        break;
+    case 3:
+        counts.assign({2, 2, 3});
+        offsets.assign({0, 2, 4});
+        break;
+    case 4:
+        counts.assign({2, 2, 1, 2});
+        offsets.assign({0, 2, 4, 5});
+        break;
+    case 5:
+        counts.assign({1, 2, 1, 2, 1});
+        offsets.assign({0, 1, 3, 4, 6});
+        break;
+    case 6:
+        counts.assign({1,1,1,2,1,1});
+        offsets.assign({0,1,2,3,5,6});
+        break;
+    case 7:
+        counts.assign({1,1,1,1,1,1,1});
+        offsets.assign({0,1,2,3,4,5,6});
+        break;
+    default:
+        exit(0);
+    }
 	MPI_Barrier(MPI_COMM_WORLD);
 	start = MPI_Wtime();
 	for(int i = offsets[rank]; i < offsets[rank] + counts[rank]; i++)
@@ -375,13 +407,14 @@ int main(int argc, char** argv) {
 	MPI_Reduce(&time, &maxtime, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 	MPI_Reduce(&time, &mintime, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 	MPI_Reduce(&time, &avgtime, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+	MPI_Finalize();
+	
 	if (rank == 0)
 	{
         fulltime = avgtime;
 		avgtime /= nodesize;
 		printf("Min: %lf Max: %lf Avg: %lf Full: %lf\n", mintime, maxtime,avgtime, fulltime);
 	}
-	MPI_Finalize();
 	return 0;
 }
 

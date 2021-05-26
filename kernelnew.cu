@@ -316,7 +316,7 @@ int main(int argc, char** argv) {
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/fire_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/graffiti_GPU.ppm", 
 		"/home/shared/evm/stud/s8500/u850503/kananovich_govor/test_avp/Images/nvidia_GPU.ppm"};
-	vector<int> counts;
+    vector<int> counts;
     vector<int> offsets;
     switch (nodesize)
     {
@@ -361,7 +361,7 @@ int main(int argc, char** argv) {
 
 		pixel* input_data = nullptr;
 	
-		__loadPPM(primaryImagePath[rank], reinterpret_cast<unsigned char**>(&input_data),
+		__loadPPM(primaryImagePath[i], reinterpret_cast<unsigned char**>(&input_data),
 		reinterpret_cast<unsigned int*>(&width),
 		reinterpret_cast<unsigned int*>(&height),
 		reinterpret_cast<unsigned int*>(&channels));
@@ -393,8 +393,8 @@ int main(int argc, char** argv) {
 		cuda_filter(width, height, width_in_bytes, padded_width_in_bytes, input_data, gpu_output_data);
 
 
-		__savePPM(outputImagePathCPU[rank], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
-		__savePPM(outputImagePathGPU[rank], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
+		__savePPM(outputImagePathCPU[i], reinterpret_cast<unsigned char*>(cpu_output_data), width, height, channels);
+		__savePPM(outputImagePathGPU[i], reinterpret_cast<unsigned char*>(gpu_output_data), width, height, channels);
 			
 
 		delete[] input_data;
